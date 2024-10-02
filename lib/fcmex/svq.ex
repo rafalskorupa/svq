@@ -1,15 +1,5 @@
 defmodule Fcmex.Svq do
-  defmodule TravelSegment do
-    defstruct [
-      :from,
-      :to,
-      :type,
-      :start_date,
-      :start_time,
-      :finish_date,
-      :finish_time
-    ]
-  end
+  alias Fcmex.TripSegment
 
   @moduledoc """
 
@@ -26,8 +16,8 @@ defmodule Fcmex.Svq do
     |> stream_parse()
     |> reduce_result()
     |> case do
-      {trips, []} ->
-        {:ok, trips}
+      {segments, []} ->
+        {:ok, Enum.reverse(segments)}
 
       {_, errors} ->
         {:error, errors}
@@ -41,47 +31,47 @@ defmodule Fcmex.Svq do
 
   1) Ignores `BASED SVQ` command, so it does not validate whether it present or not
   2) Ignores empty lines
-  3) Reservation is delimiter
+  3) Reservations are kept as reservation_id in each segment - id is just an index of reservation occurence in given data source
   """
   def stream_parse(enum_or_stream) do
     enum_or_stream
     |> Stream.map(&remove_newlines/1)
     |> Stream.filter(&meaningful_line?/1)
     |> chunk_by_reservation()
-    |> Stream.map(&parse_reservation/1)
+    |> Stream.flat_map(&parse_reservation/1)
   end
 
   # Aggregates all lines for given Reservation
+  # Each Chunk is indexed by Reservation index for future reference
   defp chunk_by_reservation(collection) do
     collection
     |> Stream.chunk_while(
-      [],
-      fn element, acc ->
+      {0, []},
+      fn element, {reservation_index, acc} ->
         if element == "RESERVATION" do
-          {:cont, acc, []}
+          # Emit previous chunk, reset current chunk to [] and increase index by 1
+          {:cont, {reservation_index, acc}, {reservation_index + 1, []}}
         else
-          {:cont, [element | acc]}
+          # Add current segment to chunk
+          {:cont, {reservation_index, [element | acc]}}
         end
       end,
       fn
-        [] -> {:cont, []}
-        acc -> {:cont, Enum.reverse(acc), []}
+        # Continue with empty acc
+        {_, []} = acc -> {:cont, acc}
+        # Reverse chunk to keep order as in the source
+        {index, acc} -> {:cont, {index, Enum.reverse(acc)}, {index, []}}
       end
     )
     |> Stream.filter(&(&1 != []))
   end
 
-  def parse_reservation(segments) do
-    segments
-    |> Enum.map(&parse_segment/1)
-    |> reduce_result()
-    |> case do
-      {segments, []} ->
-        {:ok, %Fcmex.Trip{segments: segments}}
+  def parse_reservation({reservation_index, segments}) do
+    Enum.map(segments, &parse_segment(&1, reservation_index))
+  end
 
-      {_, errors} ->
-        {:error, errors}
-    end
+  def parse_reservation(segments) do
+    parse_reservation({nil, segments})
   end
 
   defp reduce_result(result_collection) do
@@ -103,33 +93,34 @@ defmodule Fcmex.Svq do
   @doc """
   Parse segment line to {:ok, %SegmentTrip{}} or return error tuple
   """
-  def parse_segment("SEGMENT: Flight " <> data) do
-    parse_travel(:flight, data)
+  def parse_segment("SEGMENT: Flight " <> data, reservation_index) do
+    parse_travel(:flight, data, reservation_index)
   end
 
-  def parse_segment("SEGMENT: Train " <> data) do
-    parse_travel(:train, data)
+  def parse_segment("SEGMENT: Train " <> data, reservation_index) do
+    parse_travel(:train, data, reservation_index)
   end
 
-  def parse_segment("SEGMENT: Hotel " <> data) do
-    parse_hotel(data)
+  def parse_segment("SEGMENT: Hotel " <> data, reservation_index) do
+    parse_hotel(data, reservation_index)
   end
 
-  def parse_segment(line) do
+  def parse_segment(line, _) do
     {:error, :invalid_segment, line}
   end
 
-  defp parse_travel(type, flight_data) do
+  defp parse_travel(type, flight_data, reservation_index) do
     case String.split(flight_data, " ") do
       [iata_from, date, start_time, "->", iata_to, finish_time] ->
         {:ok,
-         %TravelSegment{
+         %TripSegment{
            type: type,
            from: iata_from,
            to: iata_to,
            start_date: date,
            start_time: start_time,
-           finish_time: finish_time
+           finish_time: finish_time,
+           reservation_id: reservation_index
          }}
 
       _ ->
@@ -137,16 +128,17 @@ defmodule Fcmex.Svq do
     end
   end
 
-  defp parse_hotel(type \\ :hotel, data) do
+  defp parse_hotel(data, reservation_index) do
     case String.split(data, " ") do
       [iata_from, start_date, "->", finish_date] ->
         {:ok,
-         %TravelSegment{
-           type: type,
+         %TripSegment{
+           type: :hotel,
            from: iata_from,
            to: iata_from,
            start_date: start_date,
-           finish_date: finish_date
+           finish_date: finish_date,
+           reservation_id: reservation_index
          }}
 
       _ ->

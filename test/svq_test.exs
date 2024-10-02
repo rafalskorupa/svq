@@ -2,6 +2,7 @@ defmodule Fcmex.SvqTest do
   use ExUnit.Case, async: true
 
   alias Fcmex.Svq
+  alias Fcmex.{TripSegment}
 
   describe "parse/1" do
     @example_svq [
@@ -29,114 +30,99 @@ defmodule Fcmex.SvqTest do
       "SEGMENT: Flight NYC 2023-03-06 08:00 -> BOS 09:25"
     ]
 
-    test "returns parsed trips" do
-      assert {:ok, trips} = Svq.parse(@example_svq)
+    test "returns parsed segments" do
+      assert {:ok, segments} = Svq.parse(@example_svq)
 
-      assert trips == [
-               %Fcmex.Trip{
-                 segments: [
-                   %Fcmex.Svq.TravelSegment{
-                     from: "NYC",
-                     to: "BOS",
-                     type: :flight,
-                     start_date: "2023-03-06",
-                     start_time: "08:00",
-                     finish_date: nil,
-                     finish_time: "09:25"
-                   },
-                   %Fcmex.Svq.TravelSegment{
-                     from: "BCN",
-                     to: "NYC",
-                     type: :flight,
-                     start_date: "2023-03-02",
-                     start_time: "15:00",
-                     finish_date: nil,
-                     finish_time: "22:45"
-                   }
-                 ]
+      assert segments == [
+               %Fcmex.TripSegment{
+                 finish_date: nil,
+                 finish_time: "09:10",
+                 from: "SVQ",
+                 reservation_id: 1,
+                 start_date: "2023-03-02",
+                 start_time: "06:40",
+                 to: "BCN",
+                 type: :flight
                },
-               %Fcmex.Trip{
-                 segments: [
-                   %Fcmex.Svq.TravelSegment{
-                     from: "MAD",
-                     to: "MAD",
-                     type: :hotel,
-                     start_date: "2023-02-15",
-                     start_time: nil,
-                     finish_date: "2023-02-17",
-                     finish_time: nil
-                   }
-                 ]
+               %Fcmex.TripSegment{
+                 finish_date: "2023-01-10",
+                 finish_time: nil,
+                 from: "BCN",
+                 reservation_id: 2,
+                 start_date: "2023-01-05",
+                 start_time: nil,
+                 to: "BCN",
+                 type: :hotel
                },
-               %Fcmex.Trip{
-                 segments: [
-                   %Fcmex.Svq.TravelSegment{
-                     from: "SVQ",
-                     to: "MAD",
-                     type: :train,
-                     start_date: "2023-02-15",
-                     start_time: "09:30",
-                     finish_date: nil,
-                     finish_time: "11:00"
-                   },
-                   %Fcmex.Svq.TravelSegment{
-                     from: "MAD",
-                     to: "SVQ",
-                     type: :train,
-                     start_date: "2023-02-17",
-                     start_time: "17:00",
-                     finish_date: nil,
-                     finish_time: "19:30"
-                   }
-                 ]
+               %Fcmex.TripSegment{
+                 finish_date: nil,
+                 finish_time: "11:50",
+                 from: "BCN",
+                 reservation_id: 3,
+                 start_date: "2023-01-10",
+                 start_time: "10:30",
+                 to: "SVQ",
+                 type: :flight
                },
-               %Fcmex.Trip{
-                 segments: [
-                   %Fcmex.Svq.TravelSegment{
-                     from: "SVQ",
-                     to: "BCN",
-                     type: :flight,
-                     start_date: "2023-01-05",
-                     start_time: "20:40",
-                     finish_date: nil,
-                     finish_time: "22:10"
-                   },
-                   %Fcmex.Svq.TravelSegment{
-                     from: "BCN",
-                     to: "SVQ",
-                     type: :flight,
-                     start_date: "2023-01-10",
-                     start_time: "10:30",
-                     finish_date: nil,
-                     finish_time: "11:50"
-                   }
-                 ]
+               %Fcmex.TripSegment{
+                 finish_date: nil,
+                 finish_time: "22:10",
+                 from: "SVQ",
+                 reservation_id: 3,
+                 start_date: "2023-01-05",
+                 start_time: "20:40",
+                 to: "BCN",
+                 type: :flight
                },
-               %Fcmex.Trip{
-                 segments: [
-                   %Fcmex.Svq.TravelSegment{
-                     from: "BCN",
-                     to: "BCN",
-                     type: :hotel,
-                     start_date: "2023-01-05",
-                     start_time: nil,
-                     finish_date: "2023-01-10",
-                     finish_time: nil
-                   }
-                 ]
+               %Fcmex.TripSegment{
+                 finish_date: nil,
+                 finish_time: "19:30",
+                 from: "MAD",
+                 reservation_id: 4,
+                 start_date: "2023-02-17",
+                 start_time: "17:00",
+                 to: "SVQ",
+                 type: :train
                },
-               %Fcmex.Trip{
-                 segments: [
-                   %Fcmex.Svq.TravelSegment{
-                     from: "SVQ",
-                     to: "BCN",
-                     type: :flight,
-                     start_date: "2023-03-02",
-                     start_time: "06:40",
-                     finish_date: nil,
-                     finish_time: "09:10"
-                   }
-                 ]
+               %Fcmex.TripSegment{
+                 finish_date: nil,
+                 finish_time: "11:00",
+                 from: "SVQ",
+                 reservation_id: 4,
+                 start_date: "2023-02-15",
+                 start_time: "09:30",
+                 to: "MAD",
+                 type: :train
+               },
+               %Fcmex.TripSegment{
+                 finish_date: "2023-02-17",
+                 finish_time: nil,
+                 from: "MAD",
+                 reservation_id: 5,
+                 start_date: "2023-02-15",
+                 start_time: nil,
+                 to: "MAD",
+                 type: :hotel
+               },
+               %Fcmex.TripSegment{
+                 finish_date: nil,
+                 finish_time: "22:45",
+                 from: "BCN",
+                 reservation_id: 6,
+                 start_date: "2023-03-02",
+                 start_time: "15:00",
+                 to: "NYC",
+                 type: :flight
+               },
+               %Fcmex.TripSegment{
+                 finish_date: nil,
+                 finish_time: "09:25",
+                 from: "NYC",
+                 reservation_id: 6,
+                 start_date: "2023-03-06",
+                 start_time: "08:00",
+                 to: "BOS",
+                 type: :flight
                }
              ]
     end
@@ -149,46 +135,80 @@ defmodule Fcmex.SvqTest do
         "SEGMENT: Flight NYC 2023-03-06 08:00 -> BOS 09:25"
       ]
 
-      assert {:ok,
-              %Fcmex.Trip{
-                segments: [
-                  %Fcmex.Svq.TravelSegment{
-                    from: "NYC",
-                    to: "BOS",
-                    type: :flight,
-                    start_date: "2023-03-06",
-                    start_time: "08:00",
-                    finish_date: nil,
-                    finish_time: "09:25"
-                  },
-                  %Fcmex.Svq.TravelSegment{
-                    from: "BCN",
-                    to: "NYC",
-                    type: :flight,
-                    start_date: "2023-03-02",
-                    start_time: "15:00",
-                    finish_date: nil,
-                    finish_time: "22:45"
-                  }
-                ]
-              }} = Svq.parse_reservation(segments)
+      assert [
+               {
+                 :ok,
+                 %Fcmex.TripSegment{
+                   finish_date: nil,
+                   finish_time: "22:45",
+                   from: "BCN",
+                   reservation_id: 2,
+                   start_date: "2023-03-02",
+                   start_time: "15:00",
+                   to: "NYC",
+                   type: :flight
+                 }
+               },
+               {:ok,
+                %Fcmex.TripSegment{
+                  from: "NYC",
+                  to: "BOS",
+                  type: :flight,
+                  start_date: "2023-03-06",
+                  start_time: "08:00",
+                  finish_date: nil,
+                  finish_time: "09:25",
+                  reservation_id: 2
+                }}
+             ] = Svq.parse_reservation({2, segments})
     end
 
-    test "if any segment is invalid it return error tuple" do
+    test "it parses single segment reservation" do
+      segments = [
+        "SEGMENT: Flight SVQ 2023-03-02 06:40 -> BCN 09:10"
+      ]
+
+      assert [
+               ok: %TripSegment{
+                 from: "SVQ",
+                 to: "BCN",
+                 type: :flight,
+                 start_date: "2023-03-02",
+                 start_time: "06:40",
+                 finish_date: nil,
+                 finish_time: "09:10",
+                 reservation_id: 5
+               }
+             ] = Fcmex.Svq.parse_reservation({5, segments})
+    end
+
+    test "it return invalid segments" do
       segments = [
         "SEGMENT: Flight BCN 2023-03-02 15:00 -> NYC 22:45",
         "SEG: Flight NYC 2023-03-06 08:00 -> BOS 09:25"
       ]
 
-      assert {:error, error} = Svq.parse_reservation(segments)
-      assert [invalid_segment: "SEG: Flight NYC 2023-03-06 08:00 -> BOS 09:25"] = error
+      assert [
+               {:ok,
+                %Fcmex.TripSegment{
+                  from: "BCN",
+                  to: "NYC",
+                  type: :flight,
+                  start_date: "2023-03-02",
+                  start_time: "15:00",
+                  finish_date: nil,
+                  finish_time: "22:45",
+                  reservation_id: 2
+                }},
+               {:error, :invalid_segment, "SEG: Flight NYC 2023-03-06 08:00 -> BOS 09:25"}
+             ] = Fcmex.Svq.parse_reservation({2, segments})
     end
   end
 
   describe "parse_segment/1" do
     test "parse flight segemnt" do
       assert {:ok, flight} =
-               Svq.parse_segment("SEGMENT: Flight SVQ 2023-03-02 06:40 -> BCN 09:10")
+               Svq.parse_segment("SEGMENT: Flight SVQ 2023-03-02 06:40 -> BCN 09:10", 1)
 
       assert flight.type == :flight
       assert flight.from == "SVQ"
@@ -196,11 +216,12 @@ defmodule Fcmex.SvqTest do
       assert flight.start_date == "2023-03-02"
       assert flight.start_time == "06:40"
       assert flight.finish_time == "09:10"
+      assert flight.reservation_id == 1
     end
 
     test "parse train segemnt" do
       assert {:ok, segment} =
-               Svq.parse_segment("SEGMENT: Train MAD 2023-02-17 17:00 -> SVQ 19:30")
+               Svq.parse_segment("SEGMENT: Train MAD 2023-02-17 17:00 -> SVQ 19:30", 2)
 
       assert segment.type == :train
       assert segment.from == "MAD"
@@ -208,10 +229,11 @@ defmodule Fcmex.SvqTest do
       assert segment.start_date == "2023-02-17"
       assert segment.start_time == "17:00"
       assert segment.finish_time == "19:30"
+      assert segment.reservation_id == 2
     end
 
     test "parse hotel segment" do
-      assert {:ok, segment} = Svq.parse_segment("SEGMENT: Hotel BCN 2023-01-05 -> 2023-01-10")
+      assert {:ok, segment} = Svq.parse_segment("SEGMENT: Hotel BCN 2023-01-05 -> 2023-01-10", 1)
       assert segment.type == :hotel
       assert segment.from == "BCN"
       assert segment.to == "BCN"
@@ -219,11 +241,12 @@ defmodule Fcmex.SvqTest do
       refute segment.start_time
       refute segment.finish_time
       assert segment.finish_date == "2023-01-10"
+      assert segment.reservation_id == 1
     end
 
     test "when line is not a segment" do
       segment = "Hotel MAD 2023-02-15 -> 2023-02-17"
-      assert Svq.parse_segment(segment) == {:error, :invalid_segment, segment}
+      assert Svq.parse_segment(segment, 5) == {:error, :invalid_segment, segment}
     end
   end
 end
