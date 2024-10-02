@@ -16,7 +16,26 @@ defmodule Fcmex.Svq do
   """
 
   @doc """
-  Parse SVQ format
+  Parses SVQ enumerable to Fcmex.Trip structs
+
+  If any segment or reservation is invalid it return error and doesn't return any sucessfuly parsed
+  trips (it could be changed - after `reduce_result` we've got access to sucessfuly parsed data)
+  """
+  def parse(enum_or_stream) do
+    enum_or_stream
+    |> stream_parse()
+    |> reduce_result()
+    |> case do
+      {trips, []} ->
+        {:ok, trips}
+
+      {_, errors} ->
+        {:error, errors}
+    end
+  end
+
+  @doc """
+  Parse SVQ format to Stream
 
   Expects Svq data elements in Enumerable (with focus on Streams)
 
@@ -24,10 +43,17 @@ defmodule Fcmex.Svq do
   2) Ignores empty lines
   3) Reservation is delimiter
   """
-  def parse(enum_or_stream) do
+  def stream_parse(enum_or_stream) do
     enum_or_stream
     |> Stream.map(&remove_newlines/1)
     |> Stream.filter(&meaningful_line?/1)
+    |> chunk_by_reservation()
+    |> Stream.map(&parse_reservation/1)
+  end
+
+  # Aggregates all lines for given Reservation
+  defp chunk_by_reservation(collection) do
+    collection
     |> Stream.chunk_while(
       [],
       fn element, acc ->
@@ -45,23 +71,55 @@ defmodule Fcmex.Svq do
     |> Stream.filter(&(&1 != []))
   end
 
-  def parse_segment(line) do
-    case line do
-      "SEGMENT: Flight " <> data ->
-        parse_travel(:flight, data)
+  def parse_reservation(segments) do
+    segments
+    |> Enum.map(&parse_segment/1)
+    |> reduce_result()
+    |> case do
+      {segments, []} ->
+        {:ok, %Fcmex.Trip{segments: segments}}
 
-      "SEGMENT: Hotel " <> data ->
-        parse_hotel(data)
-
-      "SEGMENT: Train " <> data ->
-        parse_travel(:train, data)
-
-      _ ->
-        {:error, :invalid_segment, line}
+      {_, errors} ->
+        {:error, errors}
     end
   end
 
-  def parse_travel(type, flight_data) do
+  defp reduce_result(result_collection) do
+    Enum.reduce(
+      result_collection,
+      {_parsed = [], _errors = []},
+      fn result, {parsed, errors} ->
+        case result do
+          {:ok, segment} ->
+            {[segment | parsed], errors}
+
+          {:error, error_type, error_line} ->
+            {parsed, [{error_type, error_line} | errors]}
+        end
+      end
+    )
+  end
+
+  @doc """
+  Parse segment line to {:ok, %SegmentTrip{}} or return error tuple
+  """
+  def parse_segment("SEGMENT: Flight " <> data) do
+    parse_travel(:flight, data)
+  end
+
+  def parse_segment("SEGMENT: Train " <> data) do
+    parse_travel(:train, data)
+  end
+
+  def parse_segment("SEGMENT: Hotel " <> data) do
+    parse_hotel(data)
+  end
+
+  def parse_segment(line) do
+    {:error, :invalid_segment, line}
+  end
+
+  defp parse_travel(type, flight_data) do
     case String.split(flight_data, " ") do
       [iata_from, date, start_time, "->", iata_to, finish_time] ->
         {:ok,
@@ -75,11 +133,11 @@ defmodule Fcmex.Svq do
          }}
 
       _ ->
-        {:error, :invalid_travel, flight_data}
+        {:error, :invalid_segment, flight_data}
     end
   end
 
-  def parse_hotel(type \\ :hotel, data) do
+  defp parse_hotel(type \\ :hotel, data) do
     case String.split(data, " ") do
       [iata_from, start_date, "->", finish_date] ->
         {:ok,
@@ -95,6 +153,8 @@ defmodule Fcmex.Svq do
         {:error, :invalid_hotel, data}
     end
   end
+
+  ### Helpers
 
   defp remove_newlines(string) do
     String.replace_suffix(string, "\n", "")

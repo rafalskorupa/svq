@@ -1,6 +1,6 @@
 defmodule Fcmex.Files do
-  @spec stream(String.t()) :: Stream.t()
-  def stream(path) do
+  @spec stream_from_path(String.t()) :: Stream.t()
+  def stream_from_path(path) do
     path
     |> File.stream!()
     |> Stream.map(& &1)
