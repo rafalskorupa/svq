@@ -119,6 +119,14 @@ defmodule Fcmex.PrintableTripsTest do
              """
     end
 
+    test "if trip is empty it returns TRIP to NOWHERE" do
+      trip = %Trip{segments: []}
+
+      assert Fcmex.PrintableTrips.friendly_format(trip) == """
+             TRIP to nowhere
+             """
+    end
+
     test "it returns trip in friendly format" do
       trip = %Trip{
         segments: [
@@ -129,7 +137,7 @@ defmodule Fcmex.PrintableTripsTest do
             start_date: "2023-03-02",
             start_time: "06:40",
             finish_date: nil,
-            finish_time: "09:10\n"
+            finish_time: "09:10"
           }
         ]
       }

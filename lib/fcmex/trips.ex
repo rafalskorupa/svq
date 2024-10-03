@@ -9,7 +9,7 @@ defmodule Fcmex.Trips do
 
   Chunked segments are parsed to Trip struct - Enum.reverse is used as they are prepended to 
   linked list is more efficient and rather easier
-  
+
   """
   def aggregate_trips(segments) do
     segments
@@ -35,9 +35,8 @@ defmodule Fcmex.Trips do
          segment,
          {origin, [previous_segment | older_segments] = trip_segments}
        ) do
+    # Adding segment to existing trip
     segments =
-      # Adding segment to existing trip
-
       cond do
         connected_flight?(previous_segment, segment) ->
           # Mark previous flight as connection flight
@@ -76,7 +75,7 @@ defmodule Fcmex.Trips do
     end
   end
 
-    @doc """
+  @doc """
   Sorting is simplest working solution
 
   Is public function to be testable - maybe it should belong to internal module,
@@ -89,7 +88,7 @@ defmodule Fcmex.Trips do
   def sort_segments(segments) do
     Enum.sort_by(segments, &[&1.start_date, &1.start_time || "24:00"])
   end
-  
+
   @doc """
   Return boolean whether two segments are connected flights
   (there is less than 24 hours difference between flight segments)

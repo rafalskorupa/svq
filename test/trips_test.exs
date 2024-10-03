@@ -100,10 +100,118 @@ defmodule Fcmex.TripsTest do
   describe "aggregate_trips/1" do
     test "return trips with aggregated segments" do
       assert Fcmex.Trips.aggregate_trips(@example_segments) == [
-        %Fcmex.Trip{segments: [%Fcmex.TripSegment{from: "SVQ", to: "BCN", type: :flight, start_date: "2023-01-05", start_time: "20:40", finish_date: nil, finish_time: "22:10", reservation_id: 3, connection_flight: nil}, %Fcmex.TripSegment{from: "BCN", to: "BCN", type: :hotel, start_date: "2023-01-05", start_time: nil, finish_date: "2023-01-10", finish_time: nil, reservation_id: 2, connection_flight: nil}, %Fcmex.TripSegment{from: "BCN", to: "SVQ", type: :flight, start_date: "2023-01-10", start_time: "10:30", finish_date: nil, finish_time: "11:50", reservation_id: 3, connection_flight: nil}]},
-        %Fcmex.Trip{segments: [%Fcmex.TripSegment{from: "SVQ", to: "MAD", type: :train, start_date: "2023-02-15", start_time: "09:30", finish_date: nil, finish_time: "11:00", reservation_id: 4, connection_flight: nil}, %Fcmex.TripSegment{from: "MAD", to: "MAD", type: :hotel, start_date: "2023-02-15", start_time: nil, finish_date: "2023-02-17", finish_time: nil, reservation_id: 5, connection_flight: nil}, %Fcmex.TripSegment{from: "MAD", to: "SVQ", type: :train, start_date: "2023-02-17", start_time: "17:00", finish_date: nil, finish_time: "19:30", reservation_id: 4, connection_flight: nil}]},
-        %Fcmex.Trip{segments: [%Fcmex.TripSegment{from: "SVQ", to: "BCN", type: :flight, start_date: "2023-03-02", start_time: "06:40", finish_date: nil, finish_time: "09:10", reservation_id: 1, connection_flight: true}, %Fcmex.TripSegment{from: "BCN", to: "NYC", type: :flight, start_date: "2023-03-02", start_time: "15:00", finish_date: nil, finish_time: "22:45", reservation_id: 6, connection_flight: nil}, %Fcmex.TripSegment{from: "NYC", to: "BOS", type: :flight, start_date: "2023-03-06", start_time: "08:00", finish_date: nil, finish_time: "09:25", reservation_id: 6, connection_flight: nil}]}
-      ]
+               %Fcmex.Trip{
+                 segments: [
+                   %Fcmex.TripSegment{
+                     from: "SVQ",
+                     to: "BCN",
+                     type: :flight,
+                     start_date: "2023-01-05",
+                     start_time: "20:40",
+                     finish_date: nil,
+                     finish_time: "22:10",
+                     reservation_id: 3,
+                     connection_flight: nil
+                   },
+                   %Fcmex.TripSegment{
+                     from: "BCN",
+                     to: "BCN",
+                     type: :hotel,
+                     start_date: "2023-01-05",
+                     start_time: nil,
+                     finish_date: "2023-01-10",
+                     finish_time: nil,
+                     reservation_id: 2,
+                     connection_flight: nil
+                   },
+                   %Fcmex.TripSegment{
+                     from: "BCN",
+                     to: "SVQ",
+                     type: :flight,
+                     start_date: "2023-01-10",
+                     start_time: "10:30",
+                     finish_date: nil,
+                     finish_time: "11:50",
+                     reservation_id: 3,
+                     connection_flight: nil
+                   }
+                 ]
+               },
+               %Fcmex.Trip{
+                 segments: [
+                   %Fcmex.TripSegment{
+                     from: "SVQ",
+                     to: "MAD",
+                     type: :train,
+                     start_date: "2023-02-15",
+                     start_time: "09:30",
+                     finish_date: nil,
+                     finish_time: "11:00",
+                     reservation_id: 4,
+                     connection_flight: nil
+                   },
+                   %Fcmex.TripSegment{
+                     from: "MAD",
+                     to: "MAD",
+                     type: :hotel,
+                     start_date: "2023-02-15",
+                     start_time: nil,
+                     finish_date: "2023-02-17",
+                     finish_time: nil,
+                     reservation_id: 5,
+                     connection_flight: nil
+                   },
+                   %Fcmex.TripSegment{
+                     from: "MAD",
+                     to: "SVQ",
+                     type: :train,
+                     start_date: "2023-02-17",
+                     start_time: "17:00",
+                     finish_date: nil,
+                     finish_time: "19:30",
+                     reservation_id: 4,
+                     connection_flight: nil
+                   }
+                 ]
+               },
+               %Fcmex.Trip{
+                 segments: [
+                   %Fcmex.TripSegment{
+                     from: "SVQ",
+                     to: "BCN",
+                     type: :flight,
+                     start_date: "2023-03-02",
+                     start_time: "06:40",
+                     finish_date: nil,
+                     finish_time: "09:10",
+                     reservation_id: 1,
+                     connection_flight: true
+                   },
+                   %Fcmex.TripSegment{
+                     from: "BCN",
+                     to: "NYC",
+                     type: :flight,
+                     start_date: "2023-03-02",
+                     start_time: "15:00",
+                     finish_date: nil,
+                     finish_time: "22:45",
+                     reservation_id: 6,
+                     connection_flight: nil
+                   },
+                   %Fcmex.TripSegment{
+                     from: "NYC",
+                     to: "BOS",
+                     type: :flight,
+                     start_date: "2023-03-06",
+                     start_time: "08:00",
+                     finish_date: nil,
+                     finish_time: "09:25",
+                     reservation_id: 6,
+                     connection_flight: nil
+                   }
+                 ]
+               }
+             ]
     end
 
     test "trip to BCN with hotel and back to SVG" do

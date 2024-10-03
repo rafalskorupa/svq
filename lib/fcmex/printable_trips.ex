@@ -1,18 +1,32 @@
 defmodule Fcmex.PrintableTrips do
+  @moduledoc """
+  Module to convert internal Trip and TripSegments to desired output format
+  called "friendly format" as no better name came to my mind
+  """
+  
+  @doc """
+  Return list of trips in "friendly" UI format
+  """
   def friendly_format(%Fcmex.Trip{} = trip) do
-    [
-      friendly_header(trip),
-      Enum.map(trip.segments, &friendly_description/1)
-    ]
-    |> List.flatten()
+    trip
+    |> decode_trip()
     |> Enum.join("\n")
+    # With trailing newline
+    |> String.replace_suffix("", "\n")
   end
 
   def friendly_format(trips) when is_list(trips) do
     trips
     |> Enum.map(&friendly_format/1)
-    |> Enum.join("\n\n")
-    |> String.replace_suffix("", "\n")
+    |> Enum.join("\n")
+  end
+
+  defp decode_trip(trip) do
+    [
+      friendly_header(trip),
+      Enum.map(trip.segments, &friendly_description/1)
+    ]
+    |> List.flatten()
   end
 
   defp friendly_header(%Fcmex.Trip{segments: [%{from: origin} | _] = _segments} = trip) do
@@ -23,13 +37,12 @@ defmodule Fcmex.PrintableTrips do
   end
 
   defp friendly_header(%Fcmex.Trip{}) do
-    # Yeah, should be raised
+    # Yeah, it should be raised
     "TRIP to nowhere"
   end
 
   defp friendly_type(%Fcmex.TripSegment{type: type}) do
     case type do
-      :connected_flight -> "Flight"
       :flight -> "Flight"
       :train -> "Train"
       :hotel -> "Hotel"
