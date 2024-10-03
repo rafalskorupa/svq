@@ -3,7 +3,7 @@ defmodule Fcmex.PrintableTrips do
   Module to convert internal Trip and TripSegments to desired output format
   called "friendly format" as no better name came to my mind
   """
-  
+
   @doc """
   Return list of trips in "friendly" UI format
   """

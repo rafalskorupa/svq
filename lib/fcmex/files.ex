@@ -5,4 +5,8 @@ defmodule Fcmex.Files do
     |> File.stream!()
     |> Stream.map(& &1)
   end
+
+  def write_to_file(path, content) do
+    File.write(path, content)
+  end
 end
