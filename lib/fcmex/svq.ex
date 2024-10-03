@@ -43,6 +43,9 @@ defmodule Fcmex.Svq do
 
   # Aggregates all lines for given Reservation
   # Each Chunk is indexed by Reservation index for future reference
+  # In real scenario I would expect that Reservation would have some kind of ID
+  # so I generated simple one - if it would be parsed from file it could replace 
+  # reservation_index logic
   defp chunk_by_reservation(collection) do
     collection
     |> Stream.chunk_while(

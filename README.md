@@ -10,7 +10,6 @@ Erlang/Elixir(`.tool-versions` for asdf provided)
 * Elixir 1.15.7-otp-26
 
 ```
-mix deps.get
 mix compile
 ```
 

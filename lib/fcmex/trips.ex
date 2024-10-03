@@ -56,7 +56,7 @@ defmodule Fcmex.Trips do
           raise "NotImplemented"
       end
 
-    if segment.to == origin do
+    if trip_completed?(origin, segment) do
       # Trip has closed travel "loop" - trip is completed
       # Chunk is emitted and accumulator is cleared
       {:cont, segments, {nil, []}}
@@ -75,6 +75,10 @@ defmodule Fcmex.Trips do
     end
   end
 
+  defp trip_completed?(origin, segment) do
+    segment.to == origin
+  end
+
   @doc """
   Sorting is simplest working solution
 
@@ -82,8 +86,8 @@ defmodule Fcmex.Trips do
   but I wanted to avoid creating more complex structure of app
 
   1) As segments are not overlapping we can just compare start_date/start_time
-  2) Given date format is sortable alphabetically, so I skipped parsing dates
-  3) Hotel would be the last thing in the day, so just for sorting purposes it happens after all hours during the given day
+  2) Given date format is sortable by default, so I skipped parsing dates just to cut some corners :)
+  3) I assumed Hotel would be the last thing in the day, so just for sorting purposes it happens after all hours during the given day
   """
   def sort_segments(segments) do
     Enum.sort_by(segments, &[&1.start_date, &1.start_time || "24:00"])
