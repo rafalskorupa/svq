@@ -1,7 +1,5 @@
 # Fcmex
 
-**TODO: Add description**
-
 ## Installation
 
 Erlang/Elixir(`.tool-versions` for asdf provided)
@@ -42,16 +40,19 @@ Converts input.txt SVQ to output.txt (commited to git, can be verified)
 Return error results
 
 
+## Notes
 
-```elixir
-def deps do
-  [
-    {:fcmex, "~> 0.1.0"}
-  ]
-end
-```
+No external dependencies, the whole `fcmex` directory could be copy pasted into existing project and adjusted. 
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/fcmex>.
+Added a little bit more comments I would do normally :)
 
+I purposfully ignored trips that doesn't end in origin location - I think that wouldn't be difficult to implement, but the decision how it would be resolved in domain it's definitely something I wouldn't take on my own.
+
+Sorting & aggregating segments to Trips is contained in Fcmex.Trips
+
+Tests are difficult to read, but they've got good coverage of cases I thought of - I would have to think more about how to simplify them and look for corner cases more.
+
+Skipped:
+* validations:
+  * IATA (as long as it's single word without blank spaces it's going to work) - probably would be not only validated whether it's 3-character string, but also against existing list of IATAs
+  * Dates - unless validations by raising error if something goes wrong count (imho - definitely no!). I would think about parsing Dates to DateTime at the level of parsing SVQ and building struct 
